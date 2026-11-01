@@ -1,0 +1,97 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern,microtype}
+\usepackage[a4paper,margin=22mm,top=19mm,bottom=20mm]{geometry}
+\usepackage{amsmath,graphicx,booktabs,tabularx,array,enumitem,xcolor}
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage[colorlinks=true,linkcolor=blue!45!black,urlcolor=blue!45!black]{hyperref}
+\hypersetup{pdftitle={Machine Learning and k-mer Methods for DNA Repeat Analysis},pdfauthor={Project report},pdfsubject={Methods, training and existing comparative results}}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+\setlist[enumerate]{leftmargin=1.6em,itemsep=4pt,topsep=3pt}
+\setlength{\textfloatsep}{10pt}
+\title{\vspace{-1.5em}\textbf{Machine Learning and k-mer Methods\\for DNA Repeat Analysis}\\[0.3em]\large Concise project report}
+\author{}\date{}
+\begin{document}
+\maketitle\vspace{-3em}
+
+\section*{Objective and data}
+The project compared methods for grouping related copies of repeated DNA sequences, and explored their use for locating repeats in a genome. The main ML comparison used \textbf{890 annotated repeat copies from 39 sequence-family labels} in human chromosome 22 (hg38), with lengths of 200--562 bp. The dataset also included 133 background-proxy regions. Related family labels and near-identical copies were kept in the same partition to reduce leakage.
+
+\begin{center}\small
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Partition & Family labels & Repeat copies & Background proxies\\
+\midrule
+Training & 20 & 480 & 70\\
+Validation & 8 & 170 & 26\\
+Test & 11 & 240 & 37\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{Methods compared}
+\begin{enumerate}
+\item \textbf{Canonical k-mer baseline.} Sequences were represented by L2-normalized frequencies of 4- and 5-base DNA fragments. Reverse complements shared one feature. HDBSCAN supplied unsupervised clustering; the frequency representation itself had no trained neural parameters.
+\item \textbf{Frozen Nucleotide Transformer.} The pretrained \texttt{nucleotide-transformer-v2-50m-multi-species} model was used as a sequence encoder. The tokenizer converted DNA into tokens; the encoder produced contextual vectors for these tokens. Mean pooling over content tokens, excluding padding and special tokens, produced one 512-dimensional vector per sequence, followed by L2 normalization. This vector describes sequence similarity; it is not a predicted family label. Encoder weights remained fixed.
+\item \textbf{Contrastive representation learning and selective fine-tuning.} A nonlinear projection head, $512\!\rightarrow\!256\!\rightarrow\!128$, with GELU activation and L2 normalization was trained using supervised contrastive loss. The head transformed each pooled 512-dimensional vector into a normalized 128-dimensional embedding. Supervised contrastive training pulled distinct copies of the same training family together and separated copies from different families. Training then continued with the final two Transformer blocks unfrozen. Validation performance determined the selected checkpoint; the selected model was the \emph{projection-stage} checkpoint, not the subsequently fine-tuned backbone.
+\item \textbf{Canonical 9-mer seeding and profile-based discovery.} Exact 9-base matches proposed oriented triplets of genomic regions. A statistical sequence profile was built and iteratively expanded to find additional copies. A later extension used affine-gap alignment and overlap suppression to handle indels and duplicate intervals. This genome-search method did not use HDBSCAN.
+\end{enumerate}
+
+\textbf{From embeddings to families with HDBSCAN.} Each representation supplied a matrix with one vector per DNA copy. HDBSCAN used Euclidean distances between normalized vectors to construct a density-based hierarchy and extract stable clusters. It returned a cluster ID for each copy, or label $-1$ for noise, without knowing the number or names of families. Thus, neural encoding learned the similarity space, while HDBSCAN converted that space into candidate families. Annotation labels were used for training the contrastive model and for evaluation, not as inputs to clustering. Minimum cluster size $\{5,10,15,20\}$, minimum samples $\{1,3,5\}$, and selection rule (EOM/leaf) were selected by validation pair F1. NT inference averaged embeddings from both orientations and normalized again.
+
+\section*{Training setup}
+Neural training used \textbf{PyTorch/Hugging Face Transformers}, supervised contrastive loss (temperature 0.1), AdamW (weight decay 0.01), gradient clipping (1.0), and CUDA mixed precision. Batches contained four families with two distinct copies each. Reverse-complement augmentation and length/GC-matched negative sampling were applied.
+
+Projection learning used $10^{-3}$; selective fine-tuning used $10^{-5}$ for the last two backbone blocks and $10^{-4}$ for the head. Two rounds of 24 batches per stage gave \textbf{96 optimizer steps in total}. Validation selected the first projection-round checkpoint (F1 0.329); the best later fine-tuning round reached 0.314. The 9-mer/profile method had no neural-training stage: profiles were estimated from candidate sequences and refined during discovery.
+
+\section*{Comparative results}
+The table reports the saved validation and held-out test results. Pairwise precision, recall, and F1 measure whether two copies are correctly assigned to the same family. ARI is the adjusted Rand index, a second measure of agreement between predicted and annotated groups. \textbf{This experiment groups already extracted copies; it does not measure genome-wide coordinate discovery.}
+
+\begin{table}[!h]
+\centering\small
+\setlength{\tabcolsep}{5pt}
+\begin{tabularx}{\linewidth}{@{}Xrrrrr@{}}
+\toprule
+Representation & Val. F1 & Test precision & Test recall & Test F1 & Test ARI\\
+\midrule
+Canonical 4/5-mer frequencies & \textbf{0.681} & \textbf{0.589} & \textbf{0.616} & \textbf{0.602} & \textbf{0.563}\\
+Frozen Nucleotide Transformer & 0.490 & 0.225 & 0.502 & 0.311 & 0.215\\
+NT + contrastively trained projection\newline (selected checkpoint) & 0.329 & 0.169 & 0.556 & 0.260 & 0.144\\
+\bottomrule
+\end{tabularx}
+\caption{Existing results on 240 test copies from 11 family labels. Clustering included background proxies, but these pair metrics were evaluated on annotated repeat copies. Hyperparameters and checkpoint selection used validation data.}
+\end{table}
+
+The k-mer baseline performed best in this run. Frozen NT captured some family similarity, but produced more incorrect family merges. Contrastive adaptation increased test pair recall relative to frozen NT, from 0.502 to 0.556, while reducing precision from 0.225 to 0.169; the resulting F1 fell to 0.260. Thus, the tested adaptation did \textbf{not} improve overall grouping quality. The short training budget and limited dataset constrain this conclusion; it is not a general comparison of all Transformer training strategies.
+
+\section*{Genome-search and sequence-based extensions}
+A separate context-training experiment placed real repeat copies inside 800-bp genomic windows. Candidate relationships were retrieved with \textbf{FAISS cosine-similarity search} and grouped with \textbf{Leiden graph clustering}. On a 100-kb chr22 pilot, the method produced 172 candidate intervals and covered all 26 eligible short annotations by at least 80\%, but its grouping pair F1 was only \textbf{0.096}. High coverage alone therefore did not establish successful family discovery.
+
+\newpage
+\section*{9-mer/profile search results} This separate coordinate-search experiment used a 500-kb synthetic genome with 150 copies of a 300-bp repeat (final seed 43). The mutation parameter $x$ specifies exactly $\operatorname{round}(xL/2)$ substitution events per copy, allowing repeated positions; it is not the fraction of distinct mutated bases. A detected locus matched truth at interval IoU $\geq0.5$.
+
+\begin{center}\small
+\begin{tabular}{@{}rrrrrrrr@{}}
+\toprule
+$x$ & True loci & False loci & Precision & Recall & Locus F1 & Pair F1 & Best-family F1\\
+\midrule
+0.0 & 150 & 0 & 1.000 & 1.000 & 1.000 & 1.000 & 1.000\\
+0.5 & 150 & 6 & 0.962 & 1.000 & 0.980 & 0.999 & 1.000\\
+1.0 & 150 & 0 & 1.000 & 1.000 & 1.000 & 1.000 & 1.000\\
+1.5 & 150 & 6 & 0.962 & 1.000 & 0.980 & 0.999 & 1.000\\
+2.0 & 0 & 0 & -- & 0.000 & 0.000 & 0.000 & 0.000\\
+\bottomrule
+\end{tabular}
+\end{center}
+At $x=2$, no loci were reported (precision is undefined; saved metrics encode it as zero). At $x=0.5$ and $1.5$, six false loci formed an extra group, which best-family F1 alone does not penalize. Validation on four independent families recovered all 120 copies at $x=0$ and $0.5$ without false loci or family merges. These coordinate-search scores are not directly comparable with the extracted-copy HDBSCAN table, and no 9-mer-frequency/HDBSCAN result is claimed.
+
+\textbf{Indels and real DNA.} On independent synthetic seed 75, at $x=1.5$ plus 1\% single-base deletions, affine-gap refinement and overlap suppression recovered 149/150 copies versus 140/150 before refinement, with no false loci in either output. In a separate 500-kb hg38 chr22 comparison, recall of 100--1000-bp RepeatMasker annotation rows at IoU $\geq0.5$ rose from 37.3\% to 41.3\%; the near-complete subset rose from 79.7\% to 82.9\%. This is annotation concordance, not gold-standard precision; these follow-up results belong to the sequence-profile method, not NT training.
+
+\section*{Summary}
+The project implemented and evaluated transfer learning, contrastive metric learning, selective fine-tuning, density-based clustering, similarity search, graph-based discovery, and canonical 9-mer/profile search. \textbf{The strongest ML-comparison result was the k-mer baseline, not NT.} The strongest coordinate-discovery results came from the separate sequence-based profile method. 
+
+\vfill
+{\footnotesize\textbf{Result sources:} \path{runs/pilot_verified/comparison.tsv}, \path{runs/pilot_verified/complete.json}, \path{REPORT.md}, \path{runs/profile_final_seed43_v3/metrics.json}, and \path{ROBUSTNESS_REPORT.md}. This condensed report uses existing saved results only; no new model training, benchmark, or test run was performed for this revision.}
+\end{document}

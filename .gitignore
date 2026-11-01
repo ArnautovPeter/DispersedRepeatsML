@@ -1,0 +1,55 @@
+# Local environments and Python tooling
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+build/
+dist/
+
+# Downloaded genomes, model weights and experiment working directories
+/data/
+/runs/
+/tmp/
+/diagnostics/
+*.pt
+*.pth
+*.safetensors
+*.onnx
+*.so
+*.o
+
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+.aws/
+.codex/
+.agents/
+.ssh/
+*.pem
+*.key
+
+# Editors and OS files
+.vscode/
+.idea/
+.DS_Store
+*~
+
+# LaTeX intermediates; keep final PDFs, sources, figures and result tables
+*.aux
+*.log
+*.out
+*.toc
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+
+# Redundant delivery archives and archived draft report
+/output/pdf/*.zip
+/output/pdf/repeat_discovery_full_article_backup/

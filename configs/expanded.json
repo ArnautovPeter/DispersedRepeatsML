@@ -1,0 +1,17 @@
+{
+  "chrom": "chr22",
+  "families": 48,
+  "copies": 128,
+  "min_copies": 16,
+  "max_per_group": 10,
+  "background_fraction": 0.15,
+  "seed": 42,
+  "projection_epochs": 5,
+  "finetune_epochs": 10,
+  "steps_per_epoch": 0,
+  "families_per_batch": 8,
+  "copies_per_family": 4,
+  "batch_size": 8,
+  "window_size": 1100,
+  "stride": 275
+}

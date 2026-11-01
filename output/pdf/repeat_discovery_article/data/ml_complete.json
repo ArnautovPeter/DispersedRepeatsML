@@ -1,0 +1,35 @@
+{
+  "selected_checkpoint": {
+    "stage": "projection",
+    "epoch": 1,
+    "validation": {
+      "params": {
+        "min_cluster_size": 10,
+        "min_samples": 1,
+        "cluster_selection_method": "eom"
+      },
+      "metrics": {
+        "pair_precision": 0.2945421741091565,
+        "pair_recall": 0.37292975442604226,
+        "pair_f1": 0.329133064516129,
+        "tp": 653,
+        "fp": 1564,
+        "fn": 1098,
+        "noise_fraction": 0.32941176470588235,
+        "clusters": 4,
+        "adjusted_rand": 0.22334612455105865,
+        "mean_parts_per_family": 8.75,
+        "fragmented_family_fraction": 1.0,
+        "merged_cluster_fraction": 1.0,
+        "mean_families_per_cluster": 3.5,
+        "assigned_purity": 0.4473684210526316,
+        "n_copies": 170,
+        "n_families": 8,
+        "n_background_proxies": 26,
+        "background_proxy_assigned_fraction": 0.5384615384615384
+      }
+    }
+  },
+  "test_evaluations": 1,
+  "task": "clustering extracted copies, not genomic discovery"
+}

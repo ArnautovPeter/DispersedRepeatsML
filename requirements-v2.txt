@@ -1,0 +1,2 @@
+# Additional SIMD alignment runtime; scripts/run_synthetic_test_v2.sh pins this too.
+parasail==1.3.4

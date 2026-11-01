@@ -1,0 +1,14 @@
+{
+  "sources": {
+    "runs/robustness_v4/frozen_indel_seed71/metrics.json": "505696db051df6aa0fb2be48cac81f28bb4569152255a2e63095082bf070b297",
+    "runs/robustness_v4/holdout_indel_seed72/metrics.json": "b98be213c5c435865ad58d06db6334a30ae1b8bbd9cdf188d1c7c9d78460e2b2",
+    "runs/robustness_v4/unique_gap_holdout_seed75/metrics.json": "db6bf784f7357471654f00280934dd981b566dbd79eb92243c7ab4b6c72c174f",
+    "runs/robustness_v4/real_chr22_22100000_22600000/annotation_metrics.json": "95cb0de7f1abdfa291391741fabd55b1bec12fc10b8c9a2599e2171c01d29cb9",
+    "runs/robustness_v4/real_holdout_chr22_24100000_24600000/ungapped.annotation_metrics.json": "00c770fd95d8951ae4bd681e9e8ef06c4fdc8cf8e80a75e6e2b4b4a934b211f8",
+    "runs/robustness_v4/real_holdout_chr22_24100000_24600000/gapped.annotation_metrics.json": "fac593cdff1dfe59eab0e495d50c0a96ecf7a8a845ccb6a8806c3ac89265f142",
+    "runs/robustness_v4/real_holdout_chr22_24100000_24600000/posthoc_unique/annotation_metrics.json": "8707780cad204a4d1e37404e1f697b3829b38ca26e3d2d3540ebecd526cb89f6",
+    "runs/robustness_v4/audit.json": "d60311bef3e31a92c12307219eb9b2ef53af29973a03a495f9ba1417877007de"
+  },
+  "plot_data": "output/robustness_v4/report_data.json",
+  "note": "Raw paired results and later post-hoc overlap suppression are kept separate."
+}

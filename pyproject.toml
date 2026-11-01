@@ -1,0 +1,44 @@
+[project]
+name = "repeat-nt-baseline"
+version = "0.1.0"
+requires-python = ">=3.10"
+dependencies = [
+    "torch==2.6.0",
+    "transformers>=4.48,<5",
+    "huggingface-hub>=0.28,<1",
+    "numpy>=1.26,<3",
+    "pandas>=2.2,<3",
+    "scikit-learn>=1.5,<2",
+    "hdbscan>=0.8.40",
+    "pyfaidx>=0.8",
+    "edlib>=1.3.9",
+    "requests>=2.31",
+    "psutil>=5.9",
+    "faiss-cpu>=1.8",
+    "igraph>=0.11",
+    "leidenalg>=0.10",
+    "scipy>=1.10,<2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "ruff>=0.14,<1",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+
+# Driver 550 supports the CUDA 12.4 build; do not resolve to CUDA 13.
+[tool.uv.sources]
+torch = { index = "pytorch-cu124" }
+
+[[tool.uv.index]]
+name = "pytorch-cu124"
+url = "https://download.pytorch.org/whl/cu124"
+explicit = true
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+extend-exclude = ["data", "runs"]

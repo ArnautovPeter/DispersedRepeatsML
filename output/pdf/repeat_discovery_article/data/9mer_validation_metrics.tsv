@@ -1,0 +1,5 @@
+split	x	iou	seconds	locus_precision	locus_recall	locus_f1	locus_tp	locus_fp	locus_fn	pair_precision	pair_recall	pair_f1	best_family	best_family_precision	best_family_recall	best_family_f1	detected_family_parts	candidate_families	candidate_loci	base_precision	base_recall	base_f1	mean_matched_iou	tp	fp	fn	merged_families
+validation	0.0	0.2	46.342872438000995	1.0	1.0	1.0	120	0	0	1.0	1.0	1.0	profile_0004	1.0	1.0	1.0	4	4	120	0.9510869565217391	1.0	0.9749303621169916	0.9457540458424181	1740	0	0	0
+validation	0.0	0.5	46.342872438000995	1.0	1.0	1.0	120	0	0	1.0	1.0	1.0	profile_0004	1.0	1.0	1.0	4	4	120	0.9510869565217391	1.0	0.9749303621169916	0.9457540458424181	1740	0	0	0
+validation	0.5	0.2	57.52322720200027	1.0	1.0	1.0	120	0	0	1.0	1.0	1.0	profile_0004	1.0	1.0	1.0	4	4	120	0.9556313993174061	1.0	0.9773123909249564	0.9509873661166416	1740	0	0	0
+validation	0.5	0.5	57.52322720200027	1.0	1.0	1.0	120	0	0	1.0	1.0	1.0	profile_0004	1.0	1.0	1.0	4	4	120	0.9556313993174061	1.0	0.9773123909249564	0.9509873661166416	1740	0	0	0

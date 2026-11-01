@@ -1,0 +1,16 @@
+{
+  "data": "data/pilot/copies.jsonl",
+  "model": "data/model",
+  "output": "runs/pilot_verified",
+  "device": null,
+  "fasta": "data/raw/chr22.fa.gz",
+  "flank_probability": 0.0,
+  "batch_size": 8,
+  "families_per_batch": 4,
+  "copies_per_family": 2,
+  "projection_epochs": 2,
+  "finetune_epochs": 2,
+  "steps_per_epoch": 24,
+  "temperature": 0.1,
+  "seed": 42
+}
